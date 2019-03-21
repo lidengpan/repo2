@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:security="http://www.springframework.org/schema/security"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+http://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/security
+http://www.springframework.org/schema/security/spring-security.xsd">
+<!--
+    权限协议，auto-config自动配置等于true的话，自动提供登录页面
+    use-expressions是否使用spring的表达式spel
+-->
+    <security:http auto-config="true" use-expressions="false">
+        <!-- intercept-url定义一个过滤规则 pattern表示对哪些url进行权限控制，access属性表示在请求对应
+        的URL时需要什么权限，
+        默认配置时它应该是一个以逗号分隔的角色列表，请求的用户只需拥有其中的一个角色就能成功访问对应
+        的URL
+        注意：如果不使用spel，use-expressions=false的话，那么access="Role_*"形式
+		如果使用spel，use-expressions=true，那么access="hasAnyRole('ROLE_USER','ROLE_ADMIN')",这是多个权限角色
+单个权限角色 access="hasRole('ROLE_USER')"
+        -->
+        <security:intercept-url pattern="/**" access="ROLE_USER" />
+        <!-- auto-config配置后，不需要在配置下面信息 <security:form-login /> 定义登录表单信息
+        <security:http-basic
+        /> <security:logout /> -->
+    </security:http>
+    <security:authentication-manager><!--认证管理-->
+        <security:authentication-provider><!--认证提供者-->
+            <security:user-service><!--用户服务，包含的用户名，用户密码，和认证权限-->
+                <!--注意：没有执行加密的时候密码前要加{noop}这是springSecurity5版本特性-->
+                <security:user name="user" password="{noop}user"
+                               authorities="ROLE_USER" />
+                <security:user name="admin" password="{noop}admin"
+                               authorities="ROLE_ADMIN" />
+            </security:user-service>
+        </security:authentication-provider>
+    </security:authentication-manager>
+</beans>

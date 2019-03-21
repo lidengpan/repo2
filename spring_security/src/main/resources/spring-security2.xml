@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:security="http://www.springframework.org/schema/security"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+http://www.springframework.org/schema/beans/spring-beans.xsd
+http://www.springframework.org/schema/security
+http://www.springframework.org/schema/security/spring-security.xsd">
+    <!-- 配置不过滤的资源（静态资源及登录相关） -->
+    <security:http security="none" pattern="/login.html"  />
+    <security:http security="none" pattern="/failer.html" />
+
+    <!--
+        权限协议，auto-config自动配置等于true的话，自动提供登录页面
+        use-expressions是否使用spring的表达式spel
+    -->
+    <security:http auto-config="true" use-expressions="false">
+        <security:http-basic/>
+        <!-- 配置资料连接，表示任意路径都需要ROLE_USER权限 -->
+        <security:intercept-url pattern="/**" access="ROLE_USER" />
+        <!-- 自定义登陆页面，login-page 自定义登陆页面 authentication-failure-url 用户权限校验失败之
+        后才会跳转到这个页面，如果数据库中没有这个用户则不会跳转到这个页面。
+        default-target-url 登陆成功后跳转的页面。 注：登陆页面用户名固定 username，密码
+        password，action:login
+        注意：username-parameter和 password-parameter必须和login.html页面中form表单里的name属性值一致
+        authentication-success-forward-url表示认证成功，符合ROLE_USER或者ROLE_ADMIN这两种都会跳转
+        -->
+        <security:form-login login-page="/login.html"
+                             login-processing-url="/login" username-parameter="username"
+                             password-parameter="password" authentication-failure-url="/failer.html"
+                             default-target-url="/success.html"
+        />
+        <!-- 退出， invalidate-session 是否删除session  logout-url：退出处理链接  logout-success-url：退出成功页面
+        注：退出操作 只需要链接到 logout即可退出出当前用户 -->
+        <security:logout invalidate-session="true" logout-url="/logout"
+                         logout-success-url="/login.jsp" />
+        <!-- 关闭CSRF（跨域请求伪造）,默认是开启的 -->
+        <security:csrf disabled="true" />
+    </security:http>
+    <!--认证管理-->
+    <security:authentication-manager>
+        <security:authentication-provider>
+            <security:user-service>
+                <security:user name="user" password="{noop}user"
+                               authorities="ROLE_USER" />
+                <security:user name="admin" password="{noop}admin"
+                               authorities="ROLE_ADMIN" />
+            </security:user-service>
+        </security:authentication-provider>
+    </security:authentication-manager>
+</beans>
